@@ -1,6 +1,8 @@
 # tubecpy
 
-![](imgs/tubecpy.png)
+<div style="text-align: center">
+    <img src="imgs/tubecpy.png"/>
+</div>
 
 # Usage
 Hi if you want to use my code follow these simple steps.
