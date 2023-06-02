@@ -1,8 +1,8 @@
 # tubecpy
 
-<div style="text-align: center">
+<p style="align: center">
     <img src="imgs/tubecpy.png"/>
-</div>
+</p>
 
 # Usage
 Hi if you want to use my code follow these simple steps.
