@@ -1,5 +1,5 @@
-PYTHON_VENV = venv/bin/activate
-ACTIVATE_VENV = . $(PYTHON_VENV)
+PYTHON_VENV=venv/bin/activate
+ACTIVATE_VENV=. $(PYTHON_VENV)
 
 ifeq ($(origin VIRTUAL_ENV), undefined)
     $(error Python virtual environment not active.)
