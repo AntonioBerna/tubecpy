@@ -1,6 +1,6 @@
 # tubecpy
 
-<p style="align: center">
+<p align="center">
     <img src="imgs/tubecpy.png"/>
 </p>
 
