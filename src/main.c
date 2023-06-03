@@ -1,6 +1,10 @@
 #include "utility.h"
 
-#define PYTHONFILE "downloader.py"
+#if defined(__APPLE__)
+    #define PYTHONFILE "./src/downloader.py"
+#elif defined(__linux__)
+    #define PYTHONFILE "downloader.py"
+#endif
 
 void on_download_button_clicked(GtkButton *button, gpointer user_data) {
     // Ignore parameter not used
