@@ -22,7 +22,7 @@ source venv/bin/activate
 Now install the requirements for Python using the command:
 
 ```
-(venv) [linux@linux tubecpy]$ pip install requirements.txt
+(venv) [linux@linux tubecpy]$ pip install -r requirements.txt
 ```
 
 >**NOTE:** make sure you have successfully activated the virtual environment.
