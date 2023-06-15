@@ -3,8 +3,64 @@
 #if defined(__APPLE__)
     #define PYTHONFILE "./src/downloader.py"
 #elif defined(__linux__)
-    #define PYTHONFILE "downloader.py"
+    #define PYTHONFILE "./src/downloader.py"
+    #define ICONPATH "imgs/icon.png"
 #endif
+
+void run_python_process(const gchar *url, GdkPixbuf *icon) {
+    pid_t pid = fork();
+    if (pid == -1) {
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "Fork Error!");
+        gtk_window_set_icon(GTK_WINDOW(dialog), icon);
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+        return;
+    } else if (pid == 0) {
+        if (!is_valid_youtube_url(url)) {
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "Invalid YouTube URL!");
+            gtk_window_set_icon(GTK_WINDOW(dialog), icon);
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
+            return;
+        }
+
+        if (access(PYTHONFILE, R_OK) == -1) {
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "%s not found!", PYTHONFILE);
+            gtk_window_set_icon(GTK_WINDOW(dialog), icon);
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
+            return;
+        }
+
+        execlp("python", "python", PYTHONFILE, url, NULL);
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+
+        if (WIFEXITED(status)) {
+            int exit_code = WEXITSTATUS(status);
+            if (exit_code == 0) {
+                GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Download completed!");
+                gtk_window_set_icon(GTK_WINDOW(dialog), icon);
+                gtk_dialog_run(GTK_DIALOG(dialog));
+                gtk_widget_destroy(dialog);
+            } else {
+                GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "Error during video download!");
+                gtk_window_set_icon(GTK_WINDOW(dialog), icon);
+                gtk_dialog_run(GTK_DIALOG(dialog));
+                gtk_widget_destroy(dialog);
+                return;
+            }
+        } else if (WIFSIGNALED(status)) {
+            int signal = WTERMSIG(status);
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "Child process terminated by signal: %d\n", signal);
+            gtk_window_set_icon(GTK_WINDOW(dialog), icon);
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
+            return;
+        }
+    }
+}
 
 void on_download_button_clicked(GtkButton *button, gpointer user_data) {
     // Ignore parameter not used
@@ -12,28 +68,9 @@ void on_download_button_clicked(GtkButton *button, gpointer user_data) {
 
     GtkWidget *entry = GTK_WIDGET(user_data);
     const gchar *url = gtk_entry_get_text(GTK_ENTRY(entry));
+    GdkPixbuf *icon = gdk_pixbuf_new_from_file(ICONPATH, NULL);
 
-    if (!is_valid_youtube_url(url)) {
-        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "Invalid YouTube URL!");
-        gtk_dialog_run(GTK_DIALOG(dialog));
-        gtk_widget_destroy(dialog);
-        return;
-    }
-
-    if (access(PYTHONFILE, R_OK) == -1) {
-        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "%s not found!", PYTHONFILE);
-        gtk_dialog_run(GTK_DIALOG(dialog));
-        gtk_widget_destroy(dialog);
-        return;
-    }
-
-    gchar *command = g_strdup_printf("python %s %s", PYTHONFILE, url);
-    system(command);
-    g_free(command);
-
-    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "Download completed!");
-    gtk_dialog_run(GTK_DIALOG(dialog));
-    gtk_widget_destroy(dialog);
+    run_python_process(url, icon);
 }
 
 gboolean on_window_closed(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
@@ -54,6 +91,7 @@ int main(int argc, char **argv) {
     gtk_window_set_default_size(GTK_WINDOW(window), 300, 70);
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     g_signal_connect(window, "delete-event", G_CALLBACK(on_window_closed), NULL);
+    gtk_window_set_icon_from_file(GTK_WINDOW(window), ICONPATH, NULL);
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     gtk_container_add(GTK_CONTAINER(window), box);
