@@ -37,3 +37,11 @@ make
 As if by magic, an executable called ```tubecpy``` will appear! Now you just need to use the ```./tubecpy``` command to download as many youtube videos as you want!
 
 >**NOTE:** any videos you download will be saved in a directory called ```videos``` within the project folder.
+
+# Todo
+
+- [x] Add icon for linux users (see latest push)
+- [ ] Fix latest updated for MACOS users and add ```icon.png```
+- [ ] Add video title while waiting for download
+
+Suggest me some improvements, contact me on Telegram ```@CleverCode```.
